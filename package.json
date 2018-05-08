@@ -1,0 +1,49 @@
+{
+  "name": "time-profile",
+  "version": "1.0.0",
+  "description": "Measuring execution time of functions",
+  "main": "lib/profiler.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "autod": "autod",
+    "lint": "eslint lib test *.js",
+    "test": "npm run lint && egg-bin test",
+    "test-local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "pkgfiles": "egg-bin pkgfiles",
+    "ci": "npm run autod -- --check && egg-bin pkgfiles --check && npm run lint && npm run cov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-modules/time-profile.git"
+  },
+  "keywords": [
+    "profiler"
+  ],
+  "author": "gxcsoccer <gxcsoccer@126.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/node-modules/time-profile/issues"
+  },
+  "homepage": "https://github.com/node-modules/time-profile#readme",
+  "dependencies": {
+    "sdk-base": "^3.4.0"
+  },
+  "devDependencies": {
+    "autod": "^3.0.1",
+    "egg-bin": "^4.7.0",
+    "egg-ci": "^1.8.0",
+    "eslint": "^4.19.1",
+    "eslint-config-egg": "^7.0.0",
+    "mz-modules": "^2.1.0",
+    "utility": "^1.13.1"
+  },
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "ci": {
+    "version": "8, 10"
+  }
+}
