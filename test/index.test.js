@@ -1,6 +1,8 @@
 'use strict';
 
-const Profiler = require('..');
+const timeProfile = require('..');
+const { elapsed } = require('../lib/hrtime');
+const shallowEqualArrays = require('shallow-equal/arrays');
 const assert = require('assert');
 const utility = require('utility');
 const sleep = require('mz-modules/sleep');
@@ -13,10 +15,14 @@ function workHard(num) {
 }
 
 describe('test/index.test.js', () => {
-  const profiler = new Profiler();
+  const profiler = timeProfile.getProfiler();
 
   beforeEach(() => {
     profiler.reset();
+  });
+
+  after(() => {
+    profiler.destroy();
   });
 
   it('should trace', () => {
@@ -29,10 +35,10 @@ describe('test/index.test.js', () => {
     assert(json.length === 2);
 
     assert(json[0].name === 'a');
-    assert(json[0].end - json[0].start === json[0].duration);
+    assert(shallowEqualArrays(elapsed(json[0].start, json[0].end), json[0].duration));
     assert(json[0].pid === process.pid);
     assert(json[1].name === 'b');
-    assert(json[1].end - json[1].start === json[1].duration);
+    assert(shallowEqualArrays(elapsed(json[1].start, json[1].end), json[1].duration));
     assert(json[1].pid === process.pid);
   });
 
@@ -74,7 +80,7 @@ describe('test/index.test.js', () => {
     assert(json[0].total === 2);
     assert(json[0].counter === 2);
     assert(json[0].message === 'a x 2');
-    assert(json[0].end - json[0].start === json[0].duration);
+    assert(shallowEqualArrays(elapsed(json[0].start, json[0].end), json[0].duration));
     assert(json[0].pid === process.pid);
     console.log(profiler.toString());
   });
@@ -176,12 +182,12 @@ describe('test/index.test.js', () => {
     assert(json[0].name === 'load Controller');
     assert(json[0].start);
     assert(json[0].end);
-    assert(json[0].duration === json[0].end - json[0].start);
+    assert(shallowEqualArrays(json[0].duration, elapsed(json[0].start, json[0].end)));
 
     assert(json[1].name === 'load Controller');
     assert(json[1].start);
     assert(json[1].end);
-    assert(json[1].duration === json[1].end - json[1].start);
+    assert(shallowEqualArrays(json[1].duration, elapsed(json[1].start, json[1].end)));
   });
 
   it('should support that there is no end entry', () => {
@@ -202,5 +208,85 @@ describe('test/index.test.js', () => {
     assert(json[1].duration == null);
 
     console.log(profiler.toString());
+  });
+
+  it('should support new profiler creation based on tag', () => {
+    const anotherProfiler = timeProfile.getProfiler('test2');
+    assert(profiler._name === 'default');
+    assert(anotherProfiler._name === 'test2');
+    assert(profiler !== anotherProfiler);
+    anotherProfiler.destroy();
+  });
+
+  it('should generate same or different profilers when using corresponding tags', () => {
+    const sameProfiler = timeProfile.getProfiler('default');
+    assert(profiler === sameProfiler);
+    const anotherProfiler = timeProfile.getProfiler('test2');
+    anotherProfiler.destroy();
+    const anotherProfiler2 = timeProfile.getProfiler('test2');
+    assert(anotherProfiler !== anotherProfiler2);
+    anotherProfiler2.destroy();
+  });
+
+  it('should profile sync functions with parameters and run them sequentially', async () => {
+    // eslint-disable-next-line no-unused-vars
+    for (const key of Array(5).keys()) {
+      await profiler.profile(workHard, 10);
+    }
+    console.log(profiler.toString());
+    assert(profiler._list.length === 5);
+    assert(profiler._list[0].name === 'workHard');
+  });
+
+  it('should profile async functions with parameters when running in parallel', async () => {
+    const asyncWorkHard = async num => await workHard(num);
+    const timesParallel = async (n, fn) =>
+      Promise.all(
+        Array(n)
+          .fill(n)
+          .map(fn)
+      );
+    await timesParallel(5, async () => profiler.profile(asyncWorkHard, 10));
+    const output = profiler.toString();
+    console.log(output);
+    assert(profiler._list.length === 1);
+    assert(profiler._list[0].name === 'asyncWorkHard');
+    assert(profiler._list[0].total === 5);
+    assert(profiler._list[0].total === 5);
+    assert(output.indexOf('NOT_END') === -1);
+  });
+
+  it('should support using a different toString width output value', () => {
+    profiler.profile(workHard, 10);
+
+    const message = '';
+    let output = profiler.toString(message, 100);
+    console.log(output);
+
+    // Repeat the assertion 100 times in order to force errors in floating-point arithmetic
+    // combined with Math.floor() => 99.999999999 will be rounded to 99
+    Array(100).fill(0).forEach(() => {
+      output = profiler.toString(message, 100);
+      assert(output.replace(message + '\n', '').indexOf('  [') === 100);
+    });
+  });
+
+  it('should show a negligible time function', async () => {
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const syncFn = a => a;
+    await profiler.profile(sleep, 10);
+    await profiler.profile(syncFn, 1);
+    let output = profiler.toString();
+    console.log(output);
+    output = output.split('\n');
+    assert(output[output.length - 1].split('▇').length - 1 === 1);
+  });
+
+  it('should work when the task is shorter than the maximum output width', async () => {
+    const syncFn = a => a;
+    await profiler.profile(syncFn, 1);
+    const maxWidth = 1e9; // this should be bigger than syncFn(1) exec time in ns
+    const outputLength = profiler.toString('', maxWidth).length;
+    assert(outputLength < 1e9);
   });
 });

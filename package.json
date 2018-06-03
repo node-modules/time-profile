@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/node-modules/time-profile#readme",
   "dependencies": {
+    "pretty-hrtime": "^1.0.3",
     "sdk-base": "^3.4.0"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "eslint": "^4.19.1",
     "eslint-config-egg": "^7.0.0",
     "mz-modules": "^2.1.0",
+    "shallow-equal": "^1.0.0",
     "utility": "^1.13.1"
   },
   "engines": {
