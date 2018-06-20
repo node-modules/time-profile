@@ -21,9 +21,12 @@ describe('test/index.test.js', () => {
 
   it('should trace', () => {
     profiler.start('a');
-    profiler.end('a');
+    const da = profiler.end('a');
     profiler.start('b');
-    profiler.end('b');
+    const db = profiler.end('b');
+
+    assert.strictEqual(typeof da, 'number');
+    assert.strictEqual(typeof db, 'number');
 
     const json = profiler.toJSON();
     assert(json.length === 2);
@@ -63,10 +66,12 @@ describe('test/index.test.js', () => {
     profiler.start('a');
 
     await sleep(100);
-    profiler.end('a');
+    const da1 = profiler.end('a');
+    assert(da1 >= 100);
 
     await sleep(10);
-    profiler.end('a');
+    const da2 = profiler.end('a');
+    assert(da2 - da1 >= 10);
 
     const json = profiler.toJSON();
     assert(json.length === 1);
