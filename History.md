@@ -1,4 +1,11 @@
 
+1.1.0 / 2018-06-21
+==================
+
+**others**
+  * [[`b01aaca`](http://github.com/node-modules/time-profile/commit/b01aaca354c87401a862d9d6aa42131c09414080)] - f (XadillaX <<i@2333.moe>>)
+  * [[`58a2b19`](http://github.com/node-modules/time-profile/commit/58a2b196cf790ee8fefdc90a114fb402dd31a8a8)] - refactor: let end() returns duration (XadillaX <<i@2333.moe>>)
+
 1.0.0 / 2018-05-15
 ==================
 
