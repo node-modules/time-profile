@@ -1,4 +1,10 @@
 
+1.1.1 / 2018-06-21
+==================
+
+**fixes**
+  * [[`bcb5891`](http://github.com/node-modules/time-profile/commit/bcb58916c612a00292110125c16ace700a2d1f88)] - fix: use old grammar to adapter old Node.js (#4) (Khaidi Chu <<i@2333.moe>>)
+
 1.1.0 / 2018-06-21
 ==================
 

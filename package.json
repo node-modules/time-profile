@@ -1,6 +1,6 @@
 {
   "name": "time-profile",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Measuring execution time of functions",
   "main": "lib/profiler.js",
   "files": [
