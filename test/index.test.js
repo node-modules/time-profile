@@ -49,16 +49,12 @@ describe('test/index.test.js', () => {
     assert(json[0].duration == null);
   });
 
-  it('should ignore start when name is empty', () => {
-    profiler.start();
-
-    const json = profiler.toJSON();
-    assert(json.length === 0);
+  it('should start when name is empty', () => {
+    assert.throws(() => { profiler.start(); }, /^AssertionError \[ERR_ASSERTION\]: should pass `key`$/);
   });
 
   it('should ignore end when name dont exist', () => {
-    profiler.end();
-    assert(profiler.toJSON().length === 0);
+    assert.throws(() => { profiler.end(); }, /^AssertionError \[ERR_ASSERTION\]: should pass `key`$/);
   });
 
   it('should combine the async task', async () => {
