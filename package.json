@@ -28,22 +28,19 @@
     "url": "https://github.com/node-modules/time-profile/issues"
   },
   "homepage": "https://github.com/node-modules/time-profile#readme",
-  "dependencies": {
-    "sdk-base": "^3.4.0"
-  },
   "devDependencies": {
     "autod": "^3.0.1",
-    "egg-bin": "^4.7.0",
+    "egg-bin": "^1.0.0",
     "egg-ci": "^1.8.0",
     "eslint": "^4.19.1",
-    "eslint-config-egg": "^7.0.0",
+    "eslint-config-egg": "^6.0.0",
     "mz-modules": "^2.1.0",
     "utility": "^1.13.1"
   },
   "engines": {
-    "node": ">= 8.0.0"
+    "node": ">= 4.0.0"
   },
   "ci": {
-    "version": "8, 10"
+    "version": "4, 6, 8, 10"
   }
 }
