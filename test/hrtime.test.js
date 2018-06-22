@@ -5,15 +5,15 @@ const assert = require('assert');
 
 describe('test/hrtime.test.js', () => {
   it('should calculate elapsed time when nanos is bigger on end', () => {
-    const diff = hrt.elapsed([ 3, 100 ], [ 5, 300 ]);
+    const diff = hrt.elapsed([ 3, 100000000 ], [ 5, 300000000 ]);
     assert(diff[0] === 2);
-    assert(diff[1] === 200);
+    assert(diff[1] === 200000000);
   });
 
   it('should calculate elapsed time when nanos is bigger on start', () => {
-    const diff = hrt.elapsed([ 3, 500 ], [ 5, 300 ]);
+    const diff = hrt.elapsed([ 3, 10 ], [ 5, 5 ]);
     assert(diff[0] === 1);
-    assert(diff[1] === 800);
+    assert(diff[1] === 999999995);
   });
 
   it('should calculate total nanoseconds from hrtime', () => {
