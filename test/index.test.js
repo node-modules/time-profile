@@ -27,9 +27,12 @@ describe('test/index.test.js', () => {
 
   it('should trace', () => {
     profiler.start('a');
-    profiler.end('a');
+    const da = profiler.end('a');
     profiler.start('b');
-    profiler.end('b');
+    const db = profiler.end('b');
+
+    assert.strictEqual(typeof da, 'number');
+    assert.strictEqual(typeof db, 'number');
 
     const json = profiler.toJSON();
     assert(json.length === 2);
@@ -52,27 +55,25 @@ describe('test/index.test.js', () => {
     assert(json[0].duration == null);
   });
 
-  it('should ignore start when name is empty', () => {
-    profiler.start();
-
-    const json = profiler.toJSON();
-    assert(json.length === 0);
+  it('should start when name is empty', () => {
+    assert.throws(() => { profiler.start(); }, /^AssertionError( \[ERR_ASSERTION\])?: should pass `key`$/);
   });
 
   it('should ignore end when name dont exist', () => {
-    profiler.end();
-    assert(profiler.toJSON().length === 0);
+    assert.throws(() => { profiler.end(); }, /^AssertionError( \[ERR_ASSERTION\])?: should pass `key`$/);
   });
 
-  it('should combine the async task', async () => {
+  it('should combine the async task', function* () {
     profiler.start('a');
     profiler.start('a');
 
-    await sleep(100);
-    profiler.end('a');
+    yield sleep(100);
+    const da1 = profiler.end('a');
+    assert(da1 >= 100);
 
-    await sleep(10);
-    profiler.end('a');
+    yield sleep(10);
+    const da2 = profiler.end('a');
+    assert(da2 - da1 >= 10);
 
     const json = profiler.toJSON();
     assert(json.length === 1);
@@ -122,24 +123,25 @@ describe('test/index.test.js', () => {
     });
   });
 
-  async function asyncWork(name, timeout = 10) {
+  function* asyncWork(name, timeout) {
+    timeout = timeout || 10;
     profiler.start(name);
-    await sleep(timeout);
+    yield sleep(timeout);
     profiler.end(name);
   }
 
-  it('should profiler async fn', async function() {
+  it('should profiler async fn', function* () {
     profiler.start('app launch');
     workHard(10);
     profiler.start('async operation 1');
     workHard(5);
     profiler.start('async operation 2');
 
-    await asyncWork('async operation 3', 10);
+    yield asyncWork('async operation 3', 10);
 
-    await sleep(10);
+    yield sleep(10);
     profiler.end('async operation 2');
-    await sleep(20);
+    yield sleep(20);
 
     profiler.end('async operation 1');
 
@@ -147,18 +149,18 @@ describe('test/index.test.js', () => {
     console.log(profiler.toString());
   });
 
-  it('should profiler not end fn', async function() {
+  it('should profiler not end fn', function* () {
     profiler.start('app launch');
     workHard(10);
     profiler.start('async operation 1');
     workHard(5);
     profiler.start('async operation 2');
 
-    await asyncWork('async operation 3', 10);
+    yield asyncWork('async operation 3', 10);
 
-    await sleep(10);
+    yield sleep(10);
     profiler.end('async operation 2');
-    await sleep(20);
+    yield sleep(20);
 
     // profiler.end('async operation 1');
 

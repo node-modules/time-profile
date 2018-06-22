@@ -1,6 +1,6 @@
 {
   "name": "time-profile",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Measuring execution time of functions",
   "main": "lib/profiler.js",
   "files": [
@@ -29,23 +29,22 @@
   },
   "homepage": "https://github.com/node-modules/time-profile#readme",
   "dependencies": {
-    "pretty-hrtime": "^1.0.3",
-    "sdk-base": "^3.4.0"
+    "pretty-hrtime": "^1.0.3"
   },
   "devDependencies": {
     "autod": "^3.0.1",
-    "egg-bin": "^4.7.0",
+    "egg-bin": "^1.0.0",
     "egg-ci": "^1.8.0",
     "eslint": "^4.19.1",
-    "eslint-config-egg": "^7.0.0",
+    "eslint-config-egg": "^6.0.0",
     "mz-modules": "^2.1.0",
     "shallow-equal": "^1.0.0",
     "utility": "^1.13.1"
   },
   "engines": {
-    "node": ">= 8.0.0"
+    "node": ">= 4.0.0"
   },
   "ci": {
-    "version": "8, 10"
+    "version": "4, 6, 8, 10"
   }
 }

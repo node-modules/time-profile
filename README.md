@@ -10,12 +10,12 @@ Measuring execution time of functions
 
 [npm-image]: https://img.shields.io/npm/v/time-profile.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/time-profile
-[travis-image]: https://img.shields.io/travis/node_modules/time-profile.svg?style=flat-square
-[travis-url]: https://travis-ci.org/node_modules/time-profile
-[codecov-image]: https://codecov.io/github/node_modules/time-profile/coverage.svg?branch=master
-[codecov-url]: https://codecov.io/github/node_modules/time-profile?branch=master
-[david-image]: https://img.shields.io/david/node_modules/time-profile.svg?style=flat-square
-[david-url]: https://david-dm.org/node_modules/time-profile
+[travis-image]: https://img.shields.io/travis/node-modules/time-profile.svg?style=flat-square
+[travis-url]: https://travis-ci.org/node-modules/time-profile
+[codecov-image]: https://codecov.io/github/node-modules/time-profile/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/node-modules/time-profile?branch=master
+[david-image]: https://img.shields.io/david/node-modules/time-profile.svg?style=flat-square
+[david-url]: https://david-dm.org/node-modules/time-profile
 [snyk-image]: https://snyk.io/test/npm/time-profile/badge.svg?style=flat-square
 [snyk-url]: https://snyk.io/test/npm/time-profile
 [download-image]: https://img.shields.io/npm/dm/time-profile.svg?style=flat-square
