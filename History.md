@@ -1,4 +1,10 @@
 
+1.2.0 / 2018-06-22
+==================
+
+**features**
+  * [[`5125756`](http://github.com/node-modules/time-profile/commit/51257566d2e4b6a8620907a67245e00a33f46d55)] - feat: remove useless sdk-base dependency (#5) (Khaidi Chu <<i@2333.moe>>)
+
 1.1.1 / 2018-06-21
 ==================
 
