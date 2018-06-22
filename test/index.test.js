@@ -31,8 +31,10 @@ describe('test/index.test.js', () => {
     profiler.start('b');
     const db = profiler.end('b');
 
-    assert.strictEqual(typeof da, 'number');
-    assert.strictEqual(typeof db, 'number');
+    assert.strictEqual(typeof da[0], 'number');
+    assert.strictEqual(typeof da[1], 'number');
+    assert.strictEqual(typeof db[0], 'number');
+    assert.strictEqual(typeof db[1], 'number');
 
     const json = profiler.toJSON();
     assert(json.length === 2);
@@ -56,24 +58,36 @@ describe('test/index.test.js', () => {
   });
 
   it('should start when name is empty', () => {
-    assert.throws(() => { profiler.start(); }, /^AssertionError( \[ERR_ASSERTION\])?: should pass `key`$/);
+    assert.throws(() => {
+      profiler.start();
+    }, /^AssertionError( \[ERR_ASSERTION\])?: should pass `key`$/);
   });
 
   it('should ignore end when name dont exist', () => {
-    assert.throws(() => { profiler.end(); }, /^AssertionError( \[ERR_ASSERTION\])?: should pass `key`$/);
+    assert.throws(() => {
+      profiler.end();
+    }, /^AssertionError( \[ERR_ASSERTION\])?: should pass `key`$/);
   });
 
-  it('should combine the async task', function* () {
+  it('should combine the async task', async () => {
     profiler.start('a');
     profiler.start('a');
 
-    yield sleep(100);
+    // Per [https://github.com/nodejs/node/issues/10154] there is a problem when using the high
+    // resolution process.hrtime to measure accuracy of the low res uv_now (wich is the basis for
+    // resolving a setTimeout callback) that sometimes lead to a 1 ms error.
+    // This is the reason why 99ms and 9ms are used on comparisons.
+
+    await sleep(100);
     const da1 = profiler.end('a');
-    assert(da1 >= 100);
+    assert(da1[0] === 0);
+    assert(da1[1] >= 99 * 1e6);
 
-    yield sleep(10);
+    await sleep(10);
     const da2 = profiler.end('a');
-    assert(da2 - da1 >= 10);
+    const diff = elapsed(da1, da2);
+    assert(diff[0] === 0);
+    assert(diff[1] >= 9 * 1e6);
 
     const json = profiler.toJSON();
     assert(json.length === 1);
@@ -123,25 +137,25 @@ describe('test/index.test.js', () => {
     });
   });
 
-  function* asyncWork(name, timeout) {
+  async function asyncWork(name, timeout) {
     timeout = timeout || 10;
     profiler.start(name);
-    yield sleep(timeout);
+    await sleep(timeout);
     profiler.end(name);
   }
 
-  it('should profiler async fn', function* () {
+  it('should profile async fn', async () => {
     profiler.start('app launch');
     workHard(10);
     profiler.start('async operation 1');
     workHard(5);
     profiler.start('async operation 2');
 
-    yield asyncWork('async operation 3', 10);
+    await asyncWork('async operation 3', 10);
 
-    yield sleep(10);
+    await sleep(10);
     profiler.end('async operation 2');
-    yield sleep(20);
+    await sleep(20);
 
     profiler.end('async operation 1');
 
@@ -149,18 +163,18 @@ describe('test/index.test.js', () => {
     console.log(profiler.toString());
   });
 
-  it('should profiler not end fn', function* () {
+  it('should profile without end fn', async () => {
     profiler.start('app launch');
     workHard(10);
     profiler.start('async operation 1');
     workHard(5);
     profiler.start('async operation 2');
 
-    yield asyncWork('async operation 3', 10);
+    await asyncWork('async operation 3', 10);
 
-    yield sleep(10);
+    await sleep(10);
     profiler.end('async operation 2');
-    yield sleep(20);
+    await sleep(20);
 
     // profiler.end('async operation 1');
 
@@ -235,9 +249,9 @@ describe('test/index.test.js', () => {
     for (const key of Array(5).keys()) {
       await profiler.profile(workHard, 10);
     }
-    console.log(profiler.toString());
     assert(profiler._list.length === 5);
     assert(profiler._list[0].name === 'workHard');
+    console.log(profiler.toString());
   });
 
   it('should profile async functions with parameters when running in parallel', async () => {
@@ -250,27 +264,59 @@ describe('test/index.test.js', () => {
       );
     await timesParallel(5, async () => profiler.profile(asyncWorkHard, 10));
     const output = profiler.toString();
-    console.log(output);
     assert(profiler._list.length === 1);
     assert(profiler._list[0].name === 'asyncWorkHard');
     assert(profiler._list[0].total === 5);
     assert(profiler._list[0].total === 5);
     assert(output.indexOf('NOT_END') === -1);
+    console.log(output);
+  });
+
+
+  it('should profile non-anonymous function with an extra tag', async () => {
+    async function namedFunc(ms) {
+      await sleep(ms);
+    }
+    await profiler.profileTagged(namedFunc, 'tagA', 100);
+    await profiler.profileTagged(namedFunc, 'tagB', 125);
+    await profiler.profileTagged(namedFunc, null, 150);
+    const output = profiler.toString();
+    assert(output.includes('tagA'));
+    assert(output.includes('tagB'));
+    assert(output.includes('namedFunc'));
+    console.log(output);
+  });
+
+  it('should profile anonymous function with an extra tag', async () => {
+    await profiler.profileTagged(async () => {
+      await sleep(100);
+    }, 'tag1');
+    const output = profiler.toString();
+    assert(output.endsWith('tag1'));
+    console.log(output);
   });
 
   it('should support using a different toString width output value', () => {
     profiler.profile(workHard, 10);
 
     const message = '';
-    let output = profiler.toString(message, 100);
+    let output = profiler.toString(
+      message,
+      100
+    );
     console.log(output);
 
     // Repeat the assertion 100 times in order to force errors in floating-point arithmetic
     // combined with Math.floor() => 99.999999999 will be rounded to 99
-    Array(100).fill(0).forEach(() => {
-      output = profiler.toString(message, 100);
-      assert(output.replace(message + '\n', '').indexOf('  [') === 100);
-    });
+    Array(100)
+      .fill(0)
+      .forEach(() => {
+        output = profiler.toString(
+          message,
+          100
+        );
+        assert(output.replace(message + '\n', '').indexOf('  [') === 100);
+      });
   });
 
   it('should show a negligible time function', async () => {
@@ -288,7 +334,10 @@ describe('test/index.test.js', () => {
     const syncFn = a => a;
     await profiler.profile(syncFn, 1);
     const maxWidth = 1e9; // this should be bigger than syncFn(1) exec time in ns
-    const outputLength = profiler.toString('', maxWidth).length;
+    const outputLength = profiler.toString(
+      '',
+      maxWidth
+    ).length;
     assert(outputLength < 1e9);
   });
 });

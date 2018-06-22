@@ -10,6 +10,7 @@ describe('test/entry.test.js', () => {
     const entry = new Entry('test');
     await sleep(10);
     entry.markEnd();
+    console.log(entry.toString());
     assert.doesNotThrow(() => console.log(entry.toString()));
   });
 });
