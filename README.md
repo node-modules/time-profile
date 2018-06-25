@@ -32,9 +32,9 @@ $ npm install time-profile
 ## Usage
 
 ```js
-const Profiler = require('time-profile');
+const timeProfile = require('time-profile');
 
-const profiler = new Profiler();
+const profiler = timeProfile.getInstance('aProfiler');
 
 profiler.start('app launch');
 // ... do work
@@ -59,6 +59,9 @@ const json = profiler.toJSON(); // [ Entry { name, start, end, duration, pid }, 
 
 // also you can print the profile timeline
 console.log(profiler.toString('this is timeline:'));
+
+// you shoud destroy it when it's not needed anymore
+profiler.destroy();
 ```
 
 ```bash
