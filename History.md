@@ -1,4 +1,10 @@
 
+2.0.0 / 2018-06-25
+==================
+
+**features**
+  * [[`31f1c9b`](http://github.com/node-modules/time-profile/commit/31f1c9bd02cafcf64bdb9b53ef2445e0284329cd)] - feat: Increased resolution from ms to ns via hrtime and changed the interface (#2) (Pablo Sotres <<psotres@users.noreply.github.com>>)
+
 1.2.0 / 2018-06-22
 ==================
 
