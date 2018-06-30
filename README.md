@@ -34,7 +34,7 @@ $ npm install time-profile
 ```js
 const timeProfile = require('time-profile');
 
-const profiler = timeProfile.getInstance('aProfiler');
+const profiler = timeProfile.getProfiler('aProfiler');
 
 profiler.start('app launch');
 // ... do work
