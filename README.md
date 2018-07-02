@@ -71,3 +71,39 @@ this is timeline:
    ▇▇▇▇▇▇▇▇▇▇▇▇▇  [47ms] - load services
                  ▇▇▇▇▇▇▇▇▇▇▇  [41ms] - init
 ```
+
+Profilers are created based on tags, and can be accessed from any scope. You can also use a simplified `profiler.profile(fn, ...params)` to measure a specific async or sync function
+
+```js
+const profiler = timeProfile.getInstance('anotherProfiler');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const syncFn = (a, b) => a + b;
+await profiler.profile(sleep, 10);
+await profiler.profile(syncFn, 1, 3);
+
+// You can even specify a different toString width output value
+console.log(profiler.toString('this is timeline:', 40));
+```
+
+```bash
+▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  [9.703106 ms] - sleep
+                                                                       ▇  [56.503 μs] - syncFn
+```
+
+Or use `profiler.profileTagged(fn, tag, ...params)` if you want to change the tag or profile and anonymous function  
+
+```js
+await profiler.profileTagged(sleep, 'tagA', 100);
+await profiler.profileTagged(sleep, 'tagB', 125);
+await profiler.profileTagged(sleep, null, 150);
+console.log(profiler.toString('this is timeline:'));
+```
+
+
+```bash
+this is timeline:
+▇▇▇▇▇▇▇▇▇▇▇▇▇  [101.674214 ms] - tagA
+                       ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  [125.914368 ms] - tagB
+                                                   ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  [150.5361 ms] - sleep
+```
+
